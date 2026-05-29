@@ -25,8 +25,7 @@ The system combines text-based personality analysis with survey-based prediction
 
 * Incorporates questionnaire-based personality assessment.
 
-* Combines text and questionnaire predictions through a meta-model architecture.
-
+* Combines text-based and questionnaire-based predictions using PyTorch neural-network meta models for final MBTI classification.
 * Provides predictions through a user-friendly web interface.
 
 ---
@@ -99,11 +98,21 @@ AI_Personality_Prediction/
 
 ## Dataset
 
-The project was trained using the MBTI Personality Dataset available on Kaggle.
+This project was trained using the MBTI Personality Dataset available on Kaggle.
 
-Dataset contains thousands of personality-labeled text posts used to train machine learning models for MBTI classification.
+Dataset link:
+https://www.kaggle.com/datasets/datasnaek/mbti-type
 
----
+The dataset is not included in this repository to keep the project lightweight.
+
+If you wish to retrain the models, download the dataset and place:
+
+`mbti_1.csv`
+
+in the root project directory.
+
+The trained machine learning models and neural-network meta models are already included, so the web application can run without downloading the dataset.
+
 
 ## How It Works
 
