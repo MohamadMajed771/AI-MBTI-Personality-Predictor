@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI MBTI Personality Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="background-shapes">
+        <div class="shape shape1"></div>
+        <div class="shape shape2"></div>
+        <div class="shape shape3"></div>
+    </div>
+
+    <header class="navbar">
+        <div class="logo">MBTI AI</div>
+        <nav>
+            <a href="#home">Home</a>
+            <a href="#predict">Predict</a>
+            <a href="#about">About</a>
+        </nav>
+    </header>
+
+    <section class="hero" id="home">
+        <div class="hero-text">
+            <div class="tag">Hybrid AI Personality System</div>
+            <h1>Predict Your <span>MBTI Personality</span> With AI</h1>
+            <p class="hero-description">
+                First, the system analyzes your text using a trained machine learning model.
+                Then it asks 16 learned questions to refine the final MBTI result in a more professional and intelligent way.
+            </p>
+            <a href="#predict" class="hero-btn">Start Prediction</a>
+        </div>
+
+        <div class="hero-card">
+            <div class="card-glow"></div>
+            <h3>How it works</h3>
+            <div class="sample-box">
+                <p class="sample-text">
+                    Step 1: Write a paragraph about yourself.<br>
+                    Step 2: The text model predicts your MBTI.<br>
+                    Step 3: You answer 16 learned questions.<br>
+                    Step 4: The system combines both learned predictions.
+                </p>
+                <div class="sample-result">
+                    <span class="result-label">Sample result</span>
+                    <span class="result-type">INTJ</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="predict-section" id="predict">
+        <div class="section-title">
+            <p>Smart Prediction Flow</p>
+            <h2>Predict My MBTI</h2>
+        </div>
+        {% if error_message %}
+        <div class="error-box">
+            {{ error_message }}
+        </div>
+        {% endif %}
+
+        {% if stage == "text_input" %}
+        <div class="predict-container">
+            <form method="POST" action="/#predict" class="predict-form">
+                <input type="hidden" name="form_stage" value="text_predict">
+
+                <label for="user_text">Tell us about yourself</label>
+                <textarea
+                    id="user_text"
+                    name="user_text"
+                    placeholder="Write a paragraph about your personality, habits, preferences, social style, decision-making, and how you usually think..."
+                    required
+                ></textarea>
+
+                <button type="submit">Predict My MBTI</button>
+            </form>
+
+            <div class="result-card">
+                <h3>Waiting for your text</h3>
+                <div class="result-placeholder">
+                    Your first prediction will appear here after the AI analyzes your paragraph.
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if stage == "questions" %}
+        <div class="predict-container full-layout">
+            <form method="POST" action="/#predict" class="predict-form">
+                <input type="hidden" name="form_stage" value="final_predict">
+                <input type="hidden" name="user_text" value="{{ user_text }}">
+
+                <div class="mcq-section">
+                    <h3>Answer all 16 learned questions</h3>
+                    <div class="scale-box">
+                        <p><strong>Scale:</strong></p>
+                        <p>1 = Strongly Disagree</p>
+                        <p>2 = Disagree</p>
+                        <p>3 = Agree</p>
+                        <p>4 = Strongly Agree</p>
+                    </div>
+
+                    {% for question in selected_questions %}
+                    <div class="question-card">
+                        <p>{{ loop.index }}) {{ question['text'] }}</p>
+
+                        <select name="{{ question['id'] }}" required>
+                            <option value="">Choose your answer</option>
+                            <option value="1">1 - Strongly Disagree</option>
+                            <option value="2">2 - Disagree</option>
+                            <option value="3">3 - Agree</option>
+                            <option value="4">4 - Strongly Agree</option>
+                        </select>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <button type="submit">Show Final MBTI</button>
+            </form>
+
+            <div class="result-card result-card-large">
+                <h3>Initial Prediction</h3>
+                <div class="result-circle">{{ text_prediction }}</div>
+                <p class="result-text">
+                    The text model has predicted your first MBTI type.
+                    Now answer all 16 learned questions so the system can refine the final result.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if stage == "result" %}
+        <div class="predict-container full-layout">
+            <div class="predict-form">
+                <div class="mcq-section">
+                    <h3>Prediction Summary</h3>
+
+                    <div class="mini-results">
+                        <div class="mini-box">
+                            <span>Text Model</span>
+                            <strong>{{ text_prediction }}</strong>
+                        </div>
+                        <div class="mini-box">
+                            <span>Question Model</span>
+                            <strong>{{ question_prediction }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="letter-guide">
+                        <h3>MBTI Letter Meanings</h3>
+                        <p><strong>I</strong> = Introversion | <strong>E</strong> = Extraversion</p>
+                        <p><strong>N</strong> = Intuition | <strong>S</strong> = Sensing</p>
+                        <p><strong>T</strong> = Thinking | <strong>F</strong> = Feeling</p>
+                        <p><strong>J</strong> = Judging | <strong>P</strong> = Perceiving</p>
+                    </div>
+
+            <div class="detail-box">
+    <h3>How the final result was combined</h3>
+
+    {% for dim, data in final_details.items() %}
+    <div class="dimension-box">
+        <h4>{{ dim }}</h4>
+
+        <p>
+            <strong>Text model:</strong>
+            {{ data.letters[0] }} = {{ data.text_probs[data.letters[0]] }},
+            {{ data.letters[1] }} = {{ data.text_probs[data.letters[1]] }}
+        </p>
+
+        <p>
+            <strong>Question model:</strong>
+            {{ data.letters[0] }} = {{ data.question_probs[data.letters[0]] }},
+            {{ data.letters[1] }} = {{ data.question_probs[data.letters[1]] }}
+        </p>
+
+        <p>
+            <strong>Meta-model confidence:</strong>
+            {{ data.letters[0] }} = {{ data.meta_probs[data.letters[0]] }},
+            {{ data.letters[1] }} = {{ data.meta_probs[data.letters[1]] }}
+        </p>
+
+        <p>
+            <strong>Final decision:</strong> {{ data.prediction }}
+        </p>
+    </div>
+    {% endfor %}
+</div>
+
+                    <a href="/#home" class="hero-btn">Try Another Prediction</a>
+                </div>
+            </div>
+
+            <div class="result-card result-card-large">
+                <h3>Final MBTI Prediction</h3>
+                <div class="result-circle">{{ final_prediction }}</div>
+                <p class="result-text">
+                    This final type was produced by combining the learned text model and the learned question model.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="about-section" id="about">
+        <div class="section-title">
+            <p>Project Overview</p>
+            <h2>Why this system is stronger</h2>
+        </div>
+
+        <div class="about-grid">
+            <div class="about-card">
+                <h3>Text-Based Learning</h3>
+                <p>
+                    The first model analyzes written text using TF-IDF features and trained machine learning classifiers.
+                </p>
+            </div>
+
+            <div class="about-card">
+                <h3>Learned Questions</h3>
+                <p>
+                    The second model learns from structured questionnaire data, so the questions are not simple hardcoded rules.
+                </p>
+            </div>
+
+            <div class="about-card">
+                <h3>Hybrid Final Result</h3>
+                <p>
+                    The final MBTI type is generated by combining both learned predictions for a more refined result.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>AI Personality Prediction Project © 2026</p>
+    </footer>
+
+    <script>
+        window.addEventListener("load", function () {
+            const predictSection = document.getElementById("predict");
+            const hasResult = document.querySelector(".result-circle") || document.querySelector(".question-card");
+
+            if (hasResult && predictSection) {
+                window.location.hash = "predict";
+            }
+        });
+    </script>
+
+</body>
+</html>
